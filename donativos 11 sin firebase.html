@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patronato Zacualpan</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; }
+        .container { max-width: 400px; margin: auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container" id="login-container">
+        <h2>Inicio de Sesión</h2>
+        <input type="text" id="nombre" placeholder="Nombre">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="login()">Ingresar</button>
+    </div>
+
+    <div class="container" id="dashboard" style="display:none;">
+        <h2>Panel de Control</h2>
+        <p>Saldo actual: <span id="saldo">$0</span></p>
+        <div id="admin-controls" style="display:none;">
+            <button onclick="agregarIngreso()">Agregar Ingreso</button>
+            <button onclick="registrarEgreso()">Registrar Egreso</button>
+        </div>
+    </div>
+
+    <script>
+        let usuarios = {
+            "Presidente": { password: "1234", rol: "presidente", saldo: 0 },
+            "Tesorera": { password: "5678", rol: "tesorera", saldo: 0 }
+        };
+        
+        let usuarioActual = null;
+
+        function login() {
+            let nombre = document.getElementById('nombre').value;
+            let password = document.getElementById('password').value;
+            
+            if (usuarios[nombre] && usuarios[nombre].password === password) {
+                usuarioActual = usuarios[nombre];
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('saldo').innerText = `$${usuarioActual.saldo}`;
+                
+                if (usuarioActual.rol === "tesorera") {
+                    document.getElementById('admin-controls').style.display = 'block';
+                }
+            } else {
+                Swal.fire('Error', 'Nombre o contraseña incorrectos.', 'error');
+            }
+        }
+
+        function agregarIngreso() {
+            if (usuarioActual.rol !== "tesorera") {
+                Swal.fire('Acceso denegado', 'Solo la tesorera puede agregar ingresos.', 'error');
+                return;
+            }
+            let monto = parseFloat(prompt('¿Cuánto donará por mes?'));
+            if (!isNaN(monto) && monto > 0) {
+                usuarioActual.saldo += monto;
+                document.getElementById('saldo').innerText = `$${usuarioActual.saldo}`;
+            }
+        }
+
+        function registrarEgreso() {
+            if (usuarioActual.rol !== "tesorera") {
+                Swal.fire('Acceso denegado', 'Solo la tesorera puede registrar egresos.', 'error');
+                return;
+            }
+            let monto = parseFloat(prompt('Ingrese el monto del egreso:'));
+            if (!isNaN(monto) && monto > 0) {
+                usuarioActual.saldo -= monto;
+                document.getElementById('saldo').innerText = `$${usuarioActual.saldo}`;
+            }
+        }
+    </script>
+</body>
+</html>
